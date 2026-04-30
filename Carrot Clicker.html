@@ -1,0 +1,549 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🥕 Carrot Clicker</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+        
+        body {
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(135deg, #1e8c1e, #0f5c0f);
+            color: white;
+            font-family: 'Press Start 2P', cursive;
+            text-align: center;
+            overflow: hidden;
+            height: 100vh;
+            width: 100vw;
+            min-height: 100dvh;
+        }
+        
+        .container {
+            width: 100%;
+            height: 100vh;
+            height: 100dvh;
+            margin: 0 auto;
+            padding: 0.5rem;
+            display: flex;
+            flex-direction: column;
+            box-sizing: border-box;
+            overflow: hidden;
+        }
+        
+        .header {
+            margin-bottom: 0.5rem;
+            flex-shrink: 0;
+        }
+        
+        .title {
+            font-size: clamp(1.2rem, 5vw, 2.5rem);
+            text-shadow: 0 0 12px #ff8c00;
+            margin: 0.3rem 0;
+            color: #ffeb3b;
+        }
+        
+        .stats {
+            display: flex;
+            justify-content: space-around;
+            background: rgba(0,0,0,0.6);
+            padding: clamp(0.5rem, 2vh, 1rem);
+            border-radius: 12px;
+            border: 3px solid #ff8c00;
+            margin-bottom: 0.5rem;
+            font-size: clamp(0.65rem, 2vw, 1rem);
+            flex-shrink: 0;
+        }
+        
+        .big-carrot {
+            font-size: clamp(80px, 30vmin, 220px);
+            cursor: pointer;
+            transition: transform 0.1s;
+            margin: 0.5rem auto;
+            line-height: 1;
+            filter: drop-shadow(0 10px 20px rgba(255, 140, 0, 0.9));
+            -webkit-user-select: none;
+            user-select: none;
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .big-carrot:active {
+            transform: scale(0.75);
+        }
+        
+        .click-effect {
+            position: absolute;
+            font-size: clamp(1rem, 2.5vw, 2rem);
+            font-weight: bold;
+            color: #ffeb3b;
+            text-shadow: 2px 2px 6px #000;
+            pointer-events: none;
+            animation: floatUp 0.9s forwards;
+        }
+        
+        @keyframes floatUp {
+            0% { opacity: 1; transform: translateY(0); }
+            100% { opacity: 0; transform: translateY(-15vh); }
+        }
+        
+        .carrots {
+            font-size: clamp(1.5rem, 4vw, 2.5rem);
+            font-weight: bold;
+            color: #ffeb3b;
+        }
+        
+        .btn {
+            background: #ff1493;
+            color: white;
+            border: none;
+            padding: clamp(0.5rem, 1.5vh, 1rem) clamp(0.75rem, 2.5vw, 1.5rem);
+            font-family: inherit;
+            font-size: clamp(0.65rem, 2vw, 1rem);
+            border-radius: 12px;
+            margin: 0.25rem auto;
+            cursor: pointer;
+            width: 90%;
+            font-weight: bold;
+            box-shadow: 0 4px 0 #c80f72;
+            flex-shrink: 0;
+        }
+        
+        .btn:active {
+            transform: translateY(2px);
+            box-shadow: 0 2px 0 #c80f72;
+        }
+
+        #pauseBtn {
+            background: #ff8c00;
+            color: white;
+            border: none;
+            padding: clamp(0.5rem, 1.5vh, 1rem) clamp(0.75rem, 2.5vw, 1.5rem);
+            font-family: inherit;
+            font-size: clamp(0.65rem, 2vw, 1rem);
+            border-radius: 12px;
+            margin: 0.25rem auto;
+            cursor: pointer;
+            width: 90%;
+            font-weight: bold;
+            box-shadow: 0 4px 0 #c86f00;
+            flex-shrink: 0;
+        }
+        
+        #pauseBtn:active {
+            transform: translateY(2px);
+            box-shadow: 0 2px 0 #c86f00;
+        }
+        
+        #pauseBtn.paused {
+            background: #32cd32;
+        }
+        
+        #resetBtn {
+            background: #dc143c;
+            box-shadow: 0 4px 0 #8b0000;
+        }
+        
+        #resetBtn:active {
+            transform: translateY(2px);
+            box-shadow: 0 2px 0 #8b0000;
+        }
+        
+        .subtitle {
+            margin: 0.25rem;
+            font-size: clamp(0.55rem, 1.8vw, 0.9rem);
+            color: #ff99cc;
+        }
+        
+        .shop-title, .achievements-title {
+            margin: 0.3rem 0 0.75rem 0;
+            font-size: clamp(0.7rem, 2.5vw, 1.2rem);
+        }
+        
+        .shop-title {
+            color: #ff1493;
+        }
+        
+        .achievements-title {
+            color: #32cd32;
+        }
+        
+        .item-owned {
+            font-size: 0.9em;
+        }
+        
+        .notification {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 12px 20px;
+            border-radius: 8px;
+            font-family: inherit;
+            z-index: 100;
+            font-size: clamp(0.6rem, 2vw, 1rem);
+        }
+        
+        .notification.achievement {
+            background: #32cd32;
+            color: #000;
+        }
+        
+        .notification.reset {
+            background: #dc143c;
+            color: #fff;
+        }
+        
+        .achievement-status {
+            font-size: 1.8em;
+        }
+        
+        .shop-container, .achievements-container {
+            background: rgba(0,0,0,0.75);
+            border: 4px solid #ff1493;
+            border-radius: 15px;
+            padding: clamp(0.5rem, 1.5vh, 1rem);
+            margin-top: 0.5rem;
+            display: none;
+            overflow-y: auto;
+            flex: 1;
+            min-height: 0;
+        }
+        
+        .shop-container.show, .achievements-container.show {
+            display: block;
+        }
+        
+        .item, .achievement {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(255,20,147,0.15);
+            margin: clamp(0.3rem, 0.8vh, 0.6rem) 0;
+            padding: clamp(0.5rem, 1vh, 1rem);
+            border-radius: 10px;
+            transition: 0.2s;
+            border: 2px solid rgba(255,140,0,0.3);
+            font-size: clamp(0.6rem, 1.8vw, 0.95rem);
+        }
+        
+        .achievement.unlocked {
+            background: rgba(50, 205, 50, 0.25);
+            border-color: #32cd32;
+        }
+        
+        .item:hover, .achievement:hover {
+            background: rgba(255,20,147,0.35);
+            border-color: #ff1493;
+            transform: scale(1.02);
+        }
+        
+        .footer {
+            margin-top: auto;
+            padding: 0.5rem 0;
+            font-size: clamp(0.4rem, 1.5vw, 0.7rem);
+            opacity: 0.8;
+            flex-shrink: 0;
+        }
+
+        /* Responsive adjustments */
+        @media (max-height: 600px) {
+            .container {
+                padding: 0.25rem;
+            }
+            .header {
+                margin-bottom: 0.25rem;
+            }
+            .stats {
+                margin-bottom: 0.25rem;
+            }
+            .big-carrot {
+                margin: 0.25rem auto;
+            }
+        }
+        
+        @media (min-height: 900px) and (min-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1 class="title">🥕 CARROT CLICKER 🥕</h1>
+            <p class="subtitle">for good pets to play 💙</p>
+        </div>
+        
+        <div class="stats">
+            <div>🥕 <span id="carrots" class="carrots">0</span></div>
+            <div id="cps">0.0 /s</div>
+        </div>
+        
+        <div id="carrot" class="big-carrot">🥕</div>
+        
+        <button id="shopBtn" class="btn">💸 OPEN SHOP 💸</button>
+        <button id="achBtn" class="btn">🏆 ACHIEVEMENTS 🏆</button>
+        <button id="pauseBtn" class="btn">⏸️ PAUSE GAME</button>
+        <button id="resetBtn" class="btn">🔄 RESET GAME 🔄</button>
+        
+        <!-- Tribute Shop -->
+        <div id="shopContainer" class="shop-container">
+            <h2 class="shop-title">💖 SHOP 💖</h2>
+            <div id="shop"></div>
+        </div>
+        
+        <!-- Achievements -->
+        <div id="achievementsContainer" class="achievements-container">
+            <h2 class="achievements-title">🏆 ACHIEVEMENTS 🏆</h2>
+            <div id="achievements"></div>
+        </div>
+        
+        <div class="footer">
+            Click for Goddess • Be a good boy • 
+        </div>
+    </div>
+
+    <script>
+        let carrots = 0;
+        let totalCarrots = 0;
+        let clickPower = 1;
+        let cps = 0;
+        let multiplier = 1;
+        let isPaused = false;
+        
+        let items = [
+            { id: "seed", name: "Little Seed", baseCost: 15, cost: 15, production: 0.6, owned: 0, emoji: "🌱" },
+            { id: "allowance", name: "Weekly Allowance", baseCost: 90, cost: 90, production: 5, owned: 0, emoji: "💵" },
+            { id: "bunny", name: "Good Boy Grower", baseCost: 280, cost: 280, production: 18, owned: 0, emoji: "🐰" },
+            { id: "chastity", name: "Chastity Cage", baseCost: 1350, cost: 1350, production: 75, owned: 0, emoji: "🔒" },
+            { id: "greenhouse", name: "Goddess Greenhouse", baseCost: 5500, cost: 5500, production: 280, owned: 0, emoji: "🏠" },
+            { id: "worship", name: "Worship Wagon", baseCost: 26000, cost: 26000, production: 1600, owned: 0, emoji: "🙇" }
+        ];
+        
+        let achievements = [
+            { id: "firstClick", name: "First Tribute", desc: "Click the carrot 50 times", icon: "👆", condition: () => totalCarrots >= 50, unlocked: false },
+            { id: "starterSimp", name: "Starter Simp", desc: "Reach 1,000 carrots", icon: "🐷", condition: () => totalCarrots >= 1000, unlocked: false },
+            { id: "goodBoy", name: "Good Boy", desc: "Own 20 total producers", icon: "🐶", condition: () => items.reduce((a, b) => a + b.owned, 0) >= 20, unlocked: false },
+            { id: "lockedUp", name: "Locked & Denied", desc: "Buy 8 Chastity Cages", icon: "🔒", condition: () => items[3].owned >= 8, unlocked: false },
+            { id: "bigSpender", name: "Big Spender", desc: "Spend 50,000 carrots in tributes", icon: "💸", condition: () => totalCarrots >= 50000, unlocked: false },
+            { id: "worshipper", name: "Devoted Worshipper", desc: "Own 5 Worship Sessions", icon: "🙇‍♂️", condition: () => items[5].owned >= 5, unlocked: false },
+            { id: "millionaire", name: "Goddess's Millionaire", desc: "Harvest 1,000,000 carrots", icon: "💎", condition: () => totalCarrots >= 1000000, unlocked: false },
+            { id: "trueSlave", name: "True Slave", desc: "Reach 10,000 Points", icon: "⛓️", condition: () => cps >= 10000, unlocked: false }
+        ];
+        
+        function loadGame() {
+            const saved = localStorage.getItem('carrotClickerSave');
+            if (saved) {
+                const data = JSON.parse(saved);
+                carrots = data.carrots || 0;
+                totalCarrots = data.totalCarrots || 0;
+                items = data.items || items;
+                achievements = data.achievements || achievements;
+            }
+            updateDisplay();
+        }
+        
+        function saveGame() {
+            const saveData = {
+                carrots: Math.floor(carrots),
+                totalCarrots: Math.floor(totalCarrots),
+                items: items,
+                achievements: achievements
+            };
+            localStorage.setItem('carrotClickerSave', JSON.stringify(saveData));
+        }
+        
+        function updateDisplay() {
+            document.getElementById('carrots').textContent = Math.floor(carrots).toLocaleString();
+            cps = items.reduce((sum, item) => sum + item.production * item.owned, 0) * multiplier;
+            document.getElementById('cps').textContent = cps.toFixed(1) + " /s";
+        }
+        
+        function renderShop() {
+            const shopDiv = document.getElementById('shop');
+            shopDiv.innerHTML = '';
+            items.forEach((item, i) => {
+                const div = document.createElement('div');
+                div.className = 'item';
+                div.innerHTML = `
+                    <div class="item-info">
+                        <div class="item-name">${item.emoji} ${item.name} <span class="item-owned">(${item.owned})</span></div>
+                        <div class="item-desc">+${item.production} carrots/sec</div>
+                    </div>
+                    <div class="item-cost">${Math.floor(item.cost).toLocaleString()} 🥕</div>
+                `;
+                div.onclick = () => buyItem(i);
+                shopDiv.appendChild(div);
+            });
+        }
+        
+        function renderAchievements() {
+            const achDiv = document.getElementById('achievements');
+            achDiv.innerHTML = '';
+            achievements.forEach(ach => {
+                const div = document.createElement('div');
+                div.className = `achievement ${ach.unlocked ? 'unlocked' : ''}`;
+                div.innerHTML = `
+                    <div class="ach-info">
+                        <div class="ach-name">${ach.icon} ${ach.name}</div>
+                        <div class="ach-desc">${ach.desc}</div>
+                    </div>
+                    <div class="achievement-status" style="opacity:${ach.unlocked ? '1' : '0.3'}">
+                        ${ach.unlocked ? '✅' : '🔒'}
+                    </div>
+                `;
+                achDiv.appendChild(div);
+            });
+        }
+        
+        function checkAchievements() {
+            let changed = false;
+            achievements.forEach(ach => {
+                if (!ach.unlocked && ach.condition()) {
+                    ach.unlocked = true;
+                    changed = true;
+                    
+                    const notif = document.createElement('div');
+                    notif.className = 'notification achievement';
+                    notif.textContent = `🏆 ${ach.name} Unlocked!`;
+                    document.body.appendChild(notif);
+                    setTimeout(() => notif.remove(), 2500);
+                }
+            });
+            if (changed) {
+                renderAchievements();
+                saveGame();
+            }
+        }
+        
+        function buyItem(index) {
+            const item = items[index];
+            if (carrots >= item.cost) {
+                carrots -= item.cost;
+                item.owned++;
+                item.cost = Math.floor(item.baseCost * Math.pow(1.16, item.owned));
+                updateDisplay();
+                renderShop();
+                checkAchievements();
+                saveGame();
+            }
+        }
+        
+        function carrotClick(e) {
+            if (isPaused) return;
+            const amount = clickPower * multiplier;
+            carrots += amount;
+            totalCarrots += amount;
+            
+            const float = document.createElement('div');
+            float.className = 'click-effect';
+            float.textContent = `+${Math.floor(amount)}`;
+            float.style.left = (e.clientX - 25) + 'px';
+            float.style.top = (e.clientY - 40) + 'px';
+            document.body.appendChild(float);
+            setTimeout(() => float.remove(), 900);
+            
+            updateDisplay();
+            checkAchievements();
+            saveGame();
+        }
+        
+        function toggleShop() {
+            const shop = document.getElementById('shopContainer');
+            const ach = document.getElementById('achievementsContainer');
+            shop.classList.toggle('show');
+            ach.classList.remove('show');
+            document.getElementById('shopBtn').textContent = shop.classList.contains('show') ? "💸 CLOSE TRIBUTE SHOP 💸" : "💸 OPEN TRIBUTE SHOP 💸";
+        }
+        
+        function toggleAchievements() {
+            const ach = document.getElementById('achievementsContainer');
+            const shop = document.getElementById('shopContainer');
+            ach.classList.toggle('show');
+            shop.classList.remove('show');
+            document.getElementById('shopBtn').textContent = "💸 OPEN TRIBUTE SHOP 💸";
+        }
+        
+        function togglePause() {
+            isPaused = !isPaused;
+            const pauseBtn = document.getElementById('pauseBtn');
+            if (isPaused) {
+                pauseBtn.textContent = "▶️ RESUME GAME";
+                pauseBtn.classList.add('paused');
+            } else {
+                pauseBtn.textContent = "⏸️ PAUSE GAME";
+                pauseBtn.classList.remove('paused');
+            }
+        }
+        
+        function resetGame() {
+            if (confirm('Are you sure you want to reset your game? This cannot be undone!')) {
+                carrots = 0;
+                totalCarrots = 0;
+                clickPower = 1;
+                cps = 0;
+                multiplier = 1;
+                isPaused = false;
+                
+                items = [
+                    { id: "seed", name: "Little Seed", baseCost: 15, cost: 15, production: 0.6, owned: 0, emoji: "🌱" },
+                    { id: "allowance", name: "Weekly Allowance", baseCost: 90, cost: 90, production: 5, owned: 0, emoji: "💵" },
+                    { id: "bunny", name: "Good Boy Grower", baseCost: 280, cost: 280, production: 18, owned: 0, emoji: "🐰" },
+                    { id: "chastity", name: "Chastity Cage", baseCost: 1350, cost: 1350, production: 75, owned: 0, emoji: "🔒" },
+                    { id: "greenhouse", name: "Goddess Greenhouse", baseCost: 5500, cost: 5500, production: 280, owned: 0, emoji: "🏠" },
+                    { id: "worship", name: "Worship Wagon", baseCost: 26000, cost: 26000, production: 1600, owned: 0, emoji: "🙇" }
+                ];
+                
+                achievements = achievements.map(ach => ({ ...ach, unlocked: false }));
+                
+                localStorage.removeItem('carrotClickerSave');
+                updateDisplay();
+                renderShop();
+                renderAchievements();
+                
+                document.getElementById('pauseBtn').textContent = "⏸️ PAUSE GAME";
+                document.getElementById('pauseBtn').classList.remove('paused');
+                
+                const notif = document.createElement('div');
+                notif.className = 'notification reset';
+                notif.textContent = '🔄 Game Reset!';
+                document.body.appendChild(notif);
+                setTimeout(() => notif.remove(), 2500);
+            }
+        }
+        
+        function gameLoop() {
+            if (isPaused) return;
+            carrots += cps / 60;
+            totalCarrots += cps / 60;
+            updateDisplay();
+            checkAchievements();
+        }
+        
+        function init() {
+            loadGame();
+            renderShop();
+            renderAchievements();
+            
+            document.getElementById('carrot').addEventListener('click', carrotClick);
+            document.getElementById('shopBtn').addEventListener('click', toggleShop);
+            document.getElementById('achBtn').addEventListener('click', toggleAchievements);
+            document.getElementById('pauseBtn').addEventListener('click', togglePause);
+            document.getElementById('resetBtn').addEventListener('click', resetGame);
+            
+            setInterval(gameLoop, 1000 / 60);
+            setInterval(saveGame, 25000);
+            
+            updateDisplay();
+            checkAchievements();
+        }
+        
+        window.onload = init;
+    </script>
+</body>
+</html>
